@@ -360,7 +360,7 @@ int TSPTW_Makespan;
 /* The following variables are read by the functions ReadParameters and 
    ReadProblem: */
 
-char *ParameterFileName, *ProblemFileName, *PiFileName,
+char *CurrentDirectory, *ParameterFileName, *ProblemFileName, *PiFileName,
     *TourFileName, *OutputTourFileName, *InputTourFileName,
     **CandidateFileName, **EdgeFileName, *InitialTourFileName,
     *SubproblemTourFileName, **MergeTourFileName,

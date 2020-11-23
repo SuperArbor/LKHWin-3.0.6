@@ -375,6 +375,8 @@ void ReadProblem()
 {
     int i, j, K;
     char *Line, *Keyword;
+    if (CurrentDirectory)
+        ProblemFileName = strcat(CurrentDirectory, ProblemFileName);
 
     if (!(ProblemFile = fopen(ProblemFileName, "r")))
         eprintf("Cannot open PROBLEM_FILE: \"%s\"", ProblemFileName);

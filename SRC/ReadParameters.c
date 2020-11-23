@@ -470,6 +470,7 @@
 
 static char Delimiters[] = "= \n\t\r\f\v\xef\xbb\xbf";
 static char *GetFileName(char *Line);
+static char* GetDirectory(char* Line);
 static char *ReadYesOrNo(int *V);
 #undef max
 static size_t max(size_t a, size_t b);
@@ -479,7 +480,7 @@ void ReadParameters()
     char *Line, *Keyword, *Token, *Name;
     unsigned int i;
 
-    ProblemFileName = PiFileName = InputTourFileName =
+    CurrentDirectory = ProblemFileName = PiFileName = InputTourFileName =
         OutputTourFileName = TourFileName = 0;
     CandidateFiles = MergeTourFiles = 0;
     AscentCandidates = 50;
@@ -565,17 +566,22 @@ void ReadParameters()
     } else {
         while (1) {
             printff("PARAMETER_FILE = ");
-            if (!(ParameterFileName = GetFileName(ReadLine(stdin)))) {
+            Line = ReadLine(stdin);
+            if (!(ParameterFileName = GetFileName(Line))) {
                 do {
                     printff("PROBLEM_FILE = ");
-                    ProblemFileName = GetFileName(ReadLine(stdin));
+                    ProblemFileName = GetFileName(stdin);
                 } while (!ProblemFileName);
                 return;
-            } else if (!(ParameterFile = fopen(ParameterFileName, "r")))
-                printff("Cannot open \"%s\". Please try again.\n",
-                        ParameterFileName);
-            else
-                break;
+            }
+            else {
+                CurrentDirectory = GetDirectory(ParameterFileName);
+
+                if (!(ParameterFile = fopen(ParameterFileName, "r")))
+                    printff("Cannot open \"%s\". Please try again.\n", ParameterFileName);
+                else
+                    break;
+            }
         }
     }
     while ((Line = ReadLine(ParameterFile))) {
@@ -1170,6 +1176,44 @@ static char *GetFileName(char *Line)
     t = (char *) malloc(strlen(Rest) + 1);
     strcpy(t, Rest);
     return t;
+}
+
+static char *GetDirectory(char *Line){
+    char* Rest = strtok(Line, "\n\t\r\f"), * t;
+
+    if (!Rest)
+        return 0;
+    while (isspace(*Rest))
+        Rest++;
+    if (!Line) {
+        if (*Rest == '=')
+            Rest++;
+    }
+    while (isspace(*Rest))
+        Rest++;
+    if (!strlen(Rest))
+        return 0;
+
+    char* lastSlash = strrchr(Rest, '/');
+    if (lastSlash != NULL) {
+        size_t count = lastSlash - Rest + 1;
+        if (count >= 1) {
+            t = (char*)malloc(count + 1);
+            //memset(t, '\0', count + 1);
+            if (t)
+            {
+                strncpy(t, Rest, count);
+                t[count] = '\0';
+            }
+            
+            return t;
+            //return strdup(t);
+        }
+        else
+            return 0;
+    }
+    else
+        return 0;
 }
 
 static char *ReadYesOrNo(int *V)
